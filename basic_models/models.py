@@ -56,7 +56,7 @@ class DefaultModel(UserModel, TimestampedModel, ActiveModel):
 
 class SlugModel(DefaultModel):
     name = models.CharField(max_length=1024)
-    slug = models.SlugField(max_length=1024, unique=True)
+    slug = models.SlugField(max_length=255, unique=True)
 
     objects = SlugModelManager()
     active_objects = IsActiveSlugModelManager()
@@ -70,7 +70,7 @@ class SlugModel(DefaultModel):
 
 class UnicodeSlugModel(DefaultModel):
     name = models.CharField(max_length=1024)
-    slug = models.CharField(max_length=1024, unique=True, blank=True, db_index=True)
+    slug = models.CharField(max_length=255, unique=True, blank=True, db_index=True)
 
     objects = SlugModelManager()
     active_objects = IsActiveSlugModelManager()
