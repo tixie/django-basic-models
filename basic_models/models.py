@@ -42,8 +42,8 @@ class TimestampedModel(models.Model):
 
 
 class UserModel(models.Model):
-    created_by = models.ForeignKey(User, related_name='%(class)s_created', default=1, null=True, blank=True)
-    updated_by = models.ForeignKey(User, related_name='%(class)s_updated', default=1, null=True, blank=True)
+    created_by = models.ForeignKey(User, related_name='%(class)s_created', default=1, null=True, blank=True, on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey(User, related_name='%(class)s_updated', default=1, null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         abstract = True
