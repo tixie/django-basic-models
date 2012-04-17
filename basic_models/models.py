@@ -42,8 +42,8 @@ class TimestampedModel(models.Model):
 
 
 class UserModel(models.Model):
-    created_by = models.ForeignKey(User, related_name='%(class)s_created', default=1, null=True, blank=True, on_delete=models.SET_NULL)
-    updated_by = models.ForeignKey(User, related_name='%(class)s_updated', default=1, null=True, blank=True, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(User, related_name='%(class)s_created', null=True, blank=True, on_delete=models.SET_NULL, editable=False)
+    updated_by = models.ForeignKey(User, related_name='%(class)s_updated', null=True, blank=True, on_delete=models.SET_NULL, editable=False)
 
     class Meta:
         abstract = True
@@ -56,21 +56,7 @@ class DefaultModel(UserModel, TimestampedModel, ActiveModel):
 
 class SlugModel(DefaultModel):
     name = models.CharField(max_length=1024)
-    slug = models.SlugField(max_length=255, unique=True)
-
-    objects = SlugModelManager()
-    active_objects = IsActiveSlugModelManager()
-
-    class Meta:
-        abstract = True
-
-    def __unicode__(self):
-        return self.name
-
-
-class UnicodeSlugModel(DefaultModel):
-    name = models.CharField(max_length=1024)
-    slug = models.CharField(max_length=255, unique=True, blank=True, db_index=True)
+    slug = models.CharField(max_length=255, unique=True, blank=True)
 
     objects = SlugModelManager()
     active_objects = IsActiveSlugModelManager()
@@ -85,3 +71,7 @@ class UnicodeSlugModel(DefaultModel):
 
     def __unicode__(self):
         return self.name
+
+
+# Maintained for backwards compatibility
+UnicodeSlugModel = SlugModel
