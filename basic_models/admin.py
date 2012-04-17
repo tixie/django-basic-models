@@ -15,11 +15,10 @@
 from django.contrib.admin import ModelAdmin
 import datetime
 
-__all__ = ['DefaultModelAdmin', 'SlugModelAdmin']
+__all__ = ['UserModelAdmin', 'DefaultModelAdmin', 'SlugModelAdmin']
 
-
-class DefaultModelAdmin(ModelAdmin):
-    """ModelAdmin subclass that will automatically update created_at or updated_at fields if they exist"""
+class UserModelAdmin(ModelAdmin):
+    """ModelAdmin subclass that will automatically update created_by and updated_by fields"""
     save_on_top = True
 
     def save_model(self, request, obj, form, change):
@@ -38,17 +37,21 @@ class DefaultModelAdmin(ModelAdmin):
     @staticmethod
     def _update_instance(instance, user):
         if not instance.pk:
+            instance.created_by = user
+        instance.updated_by = user
+
+
+class DefaultModelAdmin(UserModelAdmin):
+    """ModelAdmin subclass that will automatically update created_by or updated_by fields if they exist"""
+    @staticmethod
+    def _update_instance(instance, user):
+        if not instance.pk:
             if hasattr(instance, 'created_by'):
                 instance.created_by = user
-            if hasattr(instance, 'created_at'):
-                instance.created_at = datetime.datetime.now()
         if hasattr(instance, 'updated_by'):
             instance.updated_by = user
-        if hasattr(instance, 'updated_at'):
-            instance.updated_at = datetime.datetime.now()
 
 
 class SlugModelAdmin(DefaultModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     list_display = ('slug','name')
-
