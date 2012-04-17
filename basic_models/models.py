@@ -56,21 +56,7 @@ class DefaultModel(UserModel, TimestampedModel, ActiveModel):
 
 class SlugModel(DefaultModel):
     name = models.CharField(max_length=1024)
-    slug = models.SlugField(max_length=255, unique=True)
-
-    objects = SlugModelManager()
-    active_objects = IsActiveSlugModelManager()
-
-    class Meta:
-        abstract = True
-
-    def __unicode__(self):
-        return self.name
-
-
-class UnicodeSlugModel(DefaultModel):
-    name = models.CharField(max_length=1024)
-    slug = models.CharField(max_length=255, unique=True, blank=True, db_index=True)
+    slug = models.CharField(max_length=255, unique=True, blank=True)
 
     objects = SlugModelManager()
     active_objects = IsActiveSlugModelManager()
@@ -85,3 +71,7 @@ class UnicodeSlugModel(DefaultModel):
 
     def __unicode__(self):
         return self.name
+
+
+# Maintained for backwards compatibility
+UnicodeSlugModel = SlugModel
