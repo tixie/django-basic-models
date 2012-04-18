@@ -44,6 +44,9 @@ class UserModelAdmin(ModelAdmin):
 
 class DefaultModelAdmin(UserModelAdmin):
     """ModelAdmin subclass that will automatically update created_by or updated_by fields if they exist"""
+    
+    readonly_fields = ('created_at', 'created_by', 'updated_at', 'updated_by')
+    
     @staticmethod
     def _update_instance(instance, user):
         if not instance.pk:
