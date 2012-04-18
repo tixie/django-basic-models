@@ -20,7 +20,8 @@ __all__ = ['UserModelAdmin', 'DefaultModelAdmin', 'SlugModelAdmin']
 class UserModelAdmin(ModelAdmin):
     """ModelAdmin subclass that will automatically update created_by and updated_by fields"""
     save_on_top = True
-
+    readonly_fields = ('created_by', 'updated_by')
+    
     def save_model(self, request, obj, form, change):
         instance = form.save(commit=False)
         self._update_instance(instance, request.user)
