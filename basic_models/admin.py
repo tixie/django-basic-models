@@ -58,4 +58,4 @@ class DefaultModelAdmin(UserModelAdmin):
 
 class SlugModelAdmin(DefaultModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
-    list_display = ('slug','name')
+    list_display = ('__unicode__','slug')
