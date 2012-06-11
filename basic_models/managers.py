@@ -17,6 +17,7 @@
 
 from django.core.cache import cache
 from cachemodel import models as cachemodels
+from django.conf import settings
 
 
 class HasActiveManager(cachemodels.CacheModelManager):
