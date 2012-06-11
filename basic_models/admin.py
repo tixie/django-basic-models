@@ -14,8 +14,9 @@
 
 from django.contrib.admin import ModelAdmin
 import datetime
+from django.utils.translation import ugettext_lazy
 
-__all__ = ['UserModelAdmin', 'DefaultModelAdmin', 'SlugModelAdmin']
+__all__ = ['UserModelAdmin', 'DefaultModelAdmin', 'SlugModelAdmin', 'OneActiveAdmin']
 
 class UserModelAdmin(ModelAdmin):
     """ModelAdmin subclass that will automatically update created_by and updated_by fields"""
@@ -59,3 +60,15 @@ class DefaultModelAdmin(UserModelAdmin):
 class SlugModelAdmin(DefaultModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     list_display = ('slug','name')
+
+
+class OneActiveAdmin(ModelAdmin):
+    save_on_top = True
+    list_display = ('__unicode__', 'is_active')
+    change_form_template = "admin/preview_change_form.html"
+    actions = ['duplicate']
+
+    def duplicate(self, request, queryset):
+        for object in queryset:
+            object.clone()
+    duplicate.short_description = ugettext_lazy("Duplicate selected %(verbose_name_plural)s")

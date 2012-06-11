@@ -20,7 +20,7 @@ from django.db import models
 from cachemodel import models as cachemodels
 import re
 
-from basic_models.managers import HasActiveManager, IsActiveManager, SlugModelManager, IsActiveSlugModelManager
+from basic_models.managers import HasActiveManager, IsActiveManager, SlugModelManager, IsActiveSlugModelManager, OnlyOneActiveManager
 from basic_models.utils import u_slugify
 
 
@@ -75,3 +75,40 @@ class SlugModel(DefaultModel):
 
 # Maintained for backwards compatibility
 UnicodeSlugModel = SlugModel
+
+
+class OnlyOneActiveModel(models.Model):
+    is_active = models.BooleanField(default=False)
+    objects = OnlyOneActiveManager()
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        cache.delete('active_%s' % (self.__class__.__name__,))
+        super(OnlyOneActiveModel, self).save(*args, **kwargs)
+        if self.is_active:
+            self.__class__.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
+
+    def clone(self, *args, **kwargs):
+        new_obj = deepcopy(self)
+        new_obj.id = None
+        new_obj.is_active = False
+        new_obj.save()
+        reverse_foreignkeys = self._meta.get_all_related_objects()
+        for relation in reverse_foreignkeys:
+            relation_items = getattr(self, relation.get_accessor_name(), None) 
+            for item in relation_items.all():
+                new_item = deepcopy(item)
+                new_item.id = None
+                setattr(new_item, relation.field.name, new_obj)
+                new_item.save()
+        reverse_m2ms = self._meta.get_all_related_many_to_many_objects()
+        for relation in reverse_m2ms:
+            relation_items = getattr(self, relation.get_accessor_name(), None) 
+            for item in relation_items.all():
+                new_item = deepcopy(item)
+                new_item.id = None
+                setattr(new_item, relation.field.name, new_obj)
+                new_item.save()
+        return new_obj
