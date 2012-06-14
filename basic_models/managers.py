@@ -15,7 +15,9 @@
 
 
 
+from django.core.cache import cache
 from cachemodel import models as cachemodels
+from django.conf import settings
 
 
 class HasActiveManager(cachemodels.CacheModelManager):
@@ -38,3 +40,18 @@ class SlugModelManager(HasActiveManager):
 class IsActiveSlugModelManager(IsActiveManager):
     def get_by_slug(self, slug, cache_timeout=None):
         return self.get_by("slug", slug, cache_timeout)
+
+class OnlyOneActiveManager(cachemodels.CacheModelManager):
+    def get_active(self):
+        cache_key = 'active_%s' % (self.model.__name__)
+        active = cache.get(cache_key)
+        if active is None:
+            active = self.filter(is_active=True).order_by('-updated_at')
+            if len(active) < 1:
+                # no active one!... just pick the last one that was changed
+                active = self.all().order_by('-updated_at')
+                if len(active) < 1:
+                    return None
+            active = active[0]
+            cache.set(cache_key, active, getattr(settings, "DEFAULT_CACHE_TIMEOUT", 900))
+        return active
