@@ -18,6 +18,7 @@
 from django.core.cache import cache
 from cachemodel import models as cachemodels
 from django.conf import settings
+from django.db.models.query import QuerySet
 
 
 class HasActiveManager(cachemodels.CacheModelManager):
@@ -55,3 +56,62 @@ class OnlyOneActiveManager(cachemodels.CacheModelManager):
             active = active[0]
             cache.set(cache_key, active, getattr(settings, "DEFAULT_CACHE_TIMEOUT", 900))
         return active
+
+
+# Adapted from: http://djangosnippets.org/snippets/734/ and http://seanmonstar.com/post/708862164/extending-django-models-managers-and-querysets
+class CustomQuerySetManagerMixin(object):
+    """
+    Allows you to define chainable queryset functions on a model inner class.
+
+    Example:
+
+    ```
+    from django.db.models.query import QuerySet
+
+    class Post(models.Model):
+        published_at = models.DateTimeField()
+        author = models.ForeignKey(User)
+
+        objects = CustomQuerySetManager()
+
+        class CustomQuerySet(BaseCustomQuerySet):
+            def published(self):
+                return self.filter(published_at__lte=timezone.now(), is_active=True)
+
+            def by_author(self, author):
+                return self.filter(author=author)
+    ```
+
+    You would now be able to do the following to chain the custom queries together:
+
+    ```
+    posts = Post.objects.published().by_author(self.request.user).exclude(id=1)
+    ```
+    """
+
+    def get_query_set(self):
+        return self.model.CustomQuerySet(self.model)
+
+    def __getattr__(self, attr, *args):
+        if attr.startswith('_'):
+            # Helps avoid problems when pickling a model.
+            raise AttributeError
+        # When an attribuet of the manager is requested, return the queryset's attribute of the same name to allow chaining.
+        return getattr(self.get_query_set(), attr, *args)
+
+
+class CustomQuerySetManager(CustomQuerySetManagerMixin, HasActiveManager):
+    pass
+
+
+class CustomQuerySetSlugManager(CustomQuerySetManagerMixin, SlugModelManager):
+    pass
+
+
+class IsActiveQuerySetMixin(object):
+    def active(self):
+        return self.filter(is_active=True)
+
+
+class BaseCustomQuerySet(IsActiveQuerySetMixin, QuerySet):
+    pass
