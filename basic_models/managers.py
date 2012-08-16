@@ -90,7 +90,11 @@ class CustomQuerySetManagerMixin(object):
     """
 
     def get_query_set(self):
-        return self.model.CustomQuerySet(self.model)
+        if hasattr(self.model, 'CustomQuerySet'):
+            return self.model.CustomQuerySet(self.model)
+        else:
+            # If they haven't defined a CustomQuerySet internal class, then return a normal QuerySet to keep things rolling.
+            return QuerySet(self.model)
 
     def __getattr__(self, attr, *args):
         if attr.startswith('_'):
