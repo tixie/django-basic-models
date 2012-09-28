@@ -64,6 +64,9 @@ class SlugModel(DefaultModel):
     class Meta:
         abstract = True
 
+    def natural_key(self):
+        return self.slug
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = u_slugify(self.name)
