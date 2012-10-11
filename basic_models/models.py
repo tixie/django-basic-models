@@ -18,6 +18,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from cachemodel import models as cachemodels
+from copy import deepcopy
 import re
 
 from basic_models.managers import HasActiveManager, IsActiveManager, SlugModelManager, IsActiveSlugModelManager, OnlyOneActiveManager
