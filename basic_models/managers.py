@@ -58,6 +58,25 @@ class OnlyOneActiveManager(cachemodels.CacheModelManager):
         return active
 
 
+class GetFirstOrNoneQuerySet(models.query.QuerySet):
+    def get_first_or_none(self, *args, **kwargs):
+        try:
+            return self.filter(*args, **kwargs)[0]
+        except IndexError:
+            return None
+
+
+class GetFirstOrNoneManager(IsActiveSlugModelManager):
+    def __init__(self, fields=None, *args, **kwargs):
+        super(GetFirstOrNoneManager, self).__init__(*args, **kwargs)
+        self._fields = fields
+    
+    def get_query_set(self):
+        return GetFirstOrNoneQuerySet(self.model, self._fields)
+
+    def get_first_or_none(self, *args, **kwargs):
+        return self.get_query_set().get_first_or_none(*args, **kwargs)
+        
 # Adapted from: http://djangosnippets.org/snippets/734/ and http://seanmonstar.com/post/708862164/extending-django-models-managers-and-querysets
 class CustomQuerySetManagerMixin(object):
     """
