@@ -35,6 +35,9 @@ class IsActiveManager(cachemodels.CacheModelManager):
         return self.all()
 
 class SlugModelManager(HasActiveManager):
+    def get_by_natural_key(self,slug):
+        return self.get(slug=slug)
+
     def get_by_slug(self, slug, cache_timeout=None):
         return self.get_by("slug", slug, cache_timeout)
 
