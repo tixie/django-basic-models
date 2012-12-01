@@ -16,5 +16,10 @@
 
 
 
-
 VERSION = (0,8,4)
+
+
+# import all classes in here for convienence
+from basic_models.models import *
+from basic_models.managers import *
+from basic_models.admin import *
