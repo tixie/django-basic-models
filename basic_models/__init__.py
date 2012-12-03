@@ -16,7 +16,6 @@
 
 
 
-VERSION = (0,8,6)
 
 
 # import all classes in here for convienence
