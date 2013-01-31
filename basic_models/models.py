@@ -14,21 +14,25 @@
 
 
 from django import forms
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.cache import cache
 from django.db import models
 from django.template.defaultfilters import slugify
-from cachemodel import models as cachemodels
 from copy import deepcopy
 import re
 
-from basic_models.managers import HasActiveManager, IsActiveManager, SlugModelManager, IsActiveSlugModelManager, OnlyOneActiveManager
+from basic_models.managers import *
+import cachemodel
 
 
-class ActiveModel(cachemodels.CacheModel):
+
+_compat_auth_user_model = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
+
+
+class ActiveModel(cachemodel.CacheModel):
     is_active = models.BooleanField(default=True, db_index=True)
-    objects = HasActiveManager()
-    active_objects = IsActiveManager()
+    objects = ActiveModelManager()
+    active_objects = FilteredActiveObjectsManager()
 
     class Meta:
         abstract = True
@@ -43,8 +47,8 @@ class TimestampedModel(models.Model):
 
 
 class UserModel(models.Model):
-    created_by = models.ForeignKey(User, related_name='%(class)s_created', null=True, blank=True, on_delete=models.SET_NULL)
-    updated_by = models.ForeignKey(User, related_name='%(class)s_updated', null=True, blank=True, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(_compat_auth_user_model, related_name='%(class)s_created', null=True, blank=True, on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey(_compat_auth_user_model, related_name='%(class)s_updated', null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         abstract = True
@@ -60,7 +64,6 @@ class SlugModel(DefaultModel):
     slug = models.CharField(max_length=255, unique=True, blank=True)
 
     objects = SlugModelManager()
-    active_objects = IsActiveSlugModelManager()
 
     class Meta:
         abstract = True
@@ -71,48 +74,44 @@ class SlugModel(DefaultModel):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
-        super(UnicodeSlugModel, self).save(*args, **kwargs)
+        super(SlugModel, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
 
 
-# Maintained for backwards compatibility
-UnicodeSlugModel = SlugModel
+# class OnlyOneActiveModel(models.Model):
+#     is_active = models.BooleanField(default=False)
+#     objects = OnlyOneActiveManager()
 
+#     class Meta:
+#         abstract = True
 
-class OnlyOneActiveModel(models.Model):
-    is_active = models.BooleanField(default=False)
-    objects = OnlyOneActiveManager()
+#     def save(self, *args, **kwargs):
+#         cache.delete('active_%s' % (self.__class__.__name__,))
+#         super(OnlyOneActiveModel, self).save(*args, **kwargs)
+#         if self.is_active:
+#             self.__class__.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
 
-    class Meta:
-        abstract = True
-
-    def save(self, *args, **kwargs):
-        cache.delete('active_%s' % (self.__class__.__name__,))
-        super(OnlyOneActiveModel, self).save(*args, **kwargs)
-        if self.is_active:
-            self.__class__.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
-
-    def clone(self, *args, **kwargs):
-        new_obj = deepcopy(self)
-        new_obj.id = None
-        new_obj.is_active = False
-        new_obj.save()
-        reverse_foreignkeys = self._meta.get_all_related_objects()
-        for relation in reverse_foreignkeys:
-            relation_items = getattr(self, relation.get_accessor_name(), None) 
-            for item in relation_items.all():
-                new_item = deepcopy(item)
-                new_item.id = None
-                setattr(new_item, relation.field.name, new_obj)
-                new_item.save()
-        reverse_m2ms = self._meta.get_all_related_many_to_many_objects()
-        for relation in reverse_m2ms:
-            relation_items = getattr(self, relation.get_accessor_name(), None) 
-            for item in relation_items.all():
-                new_item = deepcopy(item)
-                new_item.id = None
-                setattr(new_item, relation.field.name, new_obj)
-                new_item.save()
-        return new_obj
+#     def clone(self, *args, **kwargs):
+#         new_obj = deepcopy(self)
+#         new_obj.id = None
+#         new_obj.is_active = False
+#         new_obj.save()
+#         reverse_foreignkeys = self._meta.get_all_related_objects()
+#         for relation in reverse_foreignkeys:
+#             relation_items = getattr(self, relation.get_accessor_name(), None) 
+#             for item in relation_items.all():
+#                 new_item = deepcopy(item)
+#                 new_item.id = None
+#                 setattr(new_item, relation.field.name, new_obj)
+#                 new_item.save()
+#         reverse_m2ms = self._meta.get_all_related_many_to_many_objects()
+#         for relation in reverse_m2ms:
+#             relation_items = getattr(self, relation.get_accessor_name(), None) 
+#             for item in relation_items.all():
+#                 new_item = deepcopy(item)
+#                 new_item.id = None
+#                 setattr(new_item, relation.field.name, new_obj)
+#                 new_item.save()
+#         return new_obj
