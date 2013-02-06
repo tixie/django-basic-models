@@ -34,4 +34,20 @@ class BasicModelsTestCase(TestCase):
         self.assertEqual(Post.objects.get_by_natural_key("hello-world"), post)
 
 
-        
+    def test_onlyoneactive_model(self):
+        cat = Category.objects.create(name='foobar')
+        for foo in ["foo","bar","baz"]:
+            Post.objects.create(
+                category=cat,
+                name=foo,
+                body=foo,
+            )
+
+        hero = "<h1>hey everybody</h1>"
+        Homepage.objects.create(
+            hero=hero,
+            posts=Post.objects.all(),
+            is_active = True
+        )
+
+        home = Homepage.objects.active_one()

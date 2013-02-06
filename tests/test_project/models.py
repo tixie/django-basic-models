@@ -16,6 +16,6 @@ class Comment(basic_models.SlugModel):
     post = models.ForeignKey(Post)
     body = models.TextField()
 
-# class Homepage(basic_models.OnlyOneActiveModel):
-#     hero = models.TextField()
-#     posts = models.ManyToManyField(Post, blank=True)
+class Homepage(basic_models.OnlyOneActiveModel):
+    hero = models.TextField()
+    posts = models.ManyToManyField(Post, blank=True)
