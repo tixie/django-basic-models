@@ -11,6 +11,8 @@ class BasicModelsTestCase(TestCase):
         Category.objects.create(name='bar', is_active=False)
         Category.objects.create(name='baz', is_active=True)
 
+        self.assertEqual(Category.active_objects.all().count(), 2)
+
         # ensure that we can filter a queryset with .active()
         self.assertEqual(Category.objects.all().active().count(), 2)
 
@@ -44,10 +46,10 @@ class BasicModelsTestCase(TestCase):
             )
 
         hero = "<h1>hey everybody</h1>"
-        Homepage.objects.create(
+        home = Homepage.objects.create(
             hero=hero,
-            posts=Post.objects.all(),
             is_active = True
         )
+        home.posts = Post.objects.all()
 
-        home = Homepage.objects.active_one()
+        # home = Homepage.objects.active_one()

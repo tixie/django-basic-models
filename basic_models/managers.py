@@ -44,13 +44,13 @@ class ActiveQuerySet(QuerySet):
         return self.filter(is_active=True)
 
 class ActiveModelManager(CustomQuerySetManager):
-    use_for_related_fields = True
     def __init__(self, *args, **kwargs):
         super(ActiveModelManager, self).__init__(query_set=ActiveQuerySet, *args, **kwargs)
 
 class FilteredActiveObjectsManager(ActiveModelManager):
-    def all(self):
-        return self.filter(is_active=True)
+    def get_query_set(self):
+        return super(FilteredActiveObjectsManager, self).get_query_set().filter(is_active=True)
+
 
 class DefaultModelManager(ActiveModelManager):
     pass
