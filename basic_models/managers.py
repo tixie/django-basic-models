@@ -25,6 +25,8 @@ import cachemodel
 class CustomQuerySetManager(models.Manager):
     def __init__(self, query_set=None, *args, **kwargs):
         self._custom_query_set = query_set
+        # this is required to fix an AttributeError with django 1.5
+        self._db = None
 
     def get_query_set(self):
         if self._custom_query_set:
