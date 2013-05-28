@@ -40,9 +40,10 @@ class UserModelAdmin(ModelAdmin):
 
     @staticmethod
     def _update_instance(instance, user):
+        picklable_user = user._wrapped if hasattr(user, '_wrapped') else user
         if not instance.pk:
-            instance.created_by = user
-        instance.updated_by = user
+            instance.created_by = picklable_user
+        instance.updated_by = picklable_user
 
 
 class ActiveModelAdmin(ModelAdmin):
