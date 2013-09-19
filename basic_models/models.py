@@ -79,6 +79,10 @@ class SlugModel(DefaultModel):
     def __unicode__(self):
         return self.name
 
+    def publish(self):
+        super(SlugModel, self).publish()
+        self.publish_by('slug')
+
 class OnlyOneActiveModel(ActiveModel):
     class Meta:
         abstract = True
