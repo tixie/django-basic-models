@@ -29,7 +29,7 @@ The models available to inherit from are ActiveModel, TimestampedModel, UserMode
 Details on what each model does can be inferred from models.py, although explaining those features here is an open task.
 
 
-## LICENSE
+## License
 
 This project is licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0). Details can be found in the LICENSE.md file.
 
