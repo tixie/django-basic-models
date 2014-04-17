@@ -84,7 +84,10 @@ class SlugModel(DefaultModel):
         super(SlugModel, self).publish()
         self.publish_by('slug')
 
+
 class OnlyOneActiveModel(ActiveModel):
+    objects = OnlyOneActiveManager()
+
     class Meta:
         abstract = True
 

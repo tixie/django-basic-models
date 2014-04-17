@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+from django.core.cache import cache
+from django.conf import settings
 from django.db.models.query import QuerySet
 from django.db import models
 
@@ -57,3 +58,19 @@ class DefaultModelManager(ActiveModelManager):
 class SlugModelManager(DefaultModelManager):
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
+
+
+class OnlyOneActiveManager(models.Manager):
+    def get_active(self):
+        cache_key = 'active_%s' % (self.model.__name__)
+        active = cache.get(cache_key)
+        if active is None:
+            active = self.filter(is_active=True).order_by('-updated_at')
+            if len(active) < 1:
+                # no active one!... just pick the last one that was changed
+                active = self.all().order_by('-updated_at')
+                if len(active) < 1:
+                    return None
+            active = active[0]
+            cache.set(cache_key, active, getattr(settings, "DEFAULT_CACHE_TIMEOUT", 900))
+        return active
