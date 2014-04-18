@@ -26,7 +26,37 @@ The models available to inherit from are ActiveModel, TimestampedModel, UserMode
 	class MyModel(SlugModel):
 		pass
 
-Details on what each model does can be inferred from models.py, although explaining those features here is an open task.
+
+### ActiveModel
+
+ActiveModel provides a boolean field called `is_active`, and allows filtering by that field with the standard manager as well as a custom `active_objects` manager. 
+
+```
+# Both return only objects with is_active=True
+MyModel.objects.active()
+MyModel.active_objects.all()
+```
+
+### TimestampedModel
+
+TimestampedModel provides two datetime fields, `created_at` and `updated_at` that auto update on save.
+
+### UserModel
+
+UserModel provides two foreign keys to the auth user model, `created_by` and `updated_by`. Both fields should be set on save using the request.user.
+
+### DefaultModel
+
+DefaultModel combines the three models above: UserModel, TimestampedModel, and ActiveModel.
+
+### SlugModel
+
+SlugModel extends DefaultModel and adds `name` and `slug` charfields.
+
+### OnlyOneActiveModel
+
+OnlyOneActiveModel extends ActiveModel, but deactivates all other instances of the model if one is activated. It also provides a manager function called `get_active()` that returns the one active instance for the model.
+
 
 
 ## License
