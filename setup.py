@@ -37,6 +37,9 @@ setup(
     version=".".join(map(str, VERSION)),
     packages = find_packages(),
     package_data = find_package_data(basic_models=['templates',]),
+    install_requires = [
+        "django-autoslug==1.7.2"
+    ],
 
     author = 'Concentric Sky',
     author_email = 'django@concentricsky.com',

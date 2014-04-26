@@ -21,6 +21,7 @@ from django.template.defaultfilters import slugify
 from copy import deepcopy
 import re
 
+from autoslug import AutoSlugField
 from basic_models.managers import *
 import cachemodel
 
@@ -62,7 +63,7 @@ class DefaultModel(UserModel, TimestampedModel, ActiveModel):
 
 class SlugModel(DefaultModel):
     name = models.CharField(max_length=1024)
-    slug = models.CharField(max_length=255, unique=True, blank=True)
+    slug = AutoSlugField(max_length=255, populate_from='name', unique=True, blank=True, editable=True)
 
     objects = SlugModelManager()
 
@@ -71,11 +72,6 @@ class SlugModel(DefaultModel):
 
     def natural_key(self):
         return [self.slug]
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        super(SlugModel, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
