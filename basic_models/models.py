@@ -90,7 +90,7 @@ class OnlyOneActiveModel(ActiveModel):
     def save(self, *args, **kwargs):
         super(OnlyOneActiveModel, self).save(*args, **kwargs)
         if self.is_active:
-            self.__class__.objects.active().exclude(pk=self.pk).update(is_active=False)
+            self.__class__.objects.filter(is_active=True).exclude(pk=self.pk).update(is_active=False)
 
     def publish(self):
         super(OnlyOneActiveModel, self).publish()
