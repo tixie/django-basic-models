@@ -23,7 +23,7 @@ class CustomQuerySetManager(models.Manager):
         self._custom_query_set = query_set
         super(CustomQuerySetManager, self).__init__()
 
-    def get_query_set(self):
+    def get_queryset(self):
         if self._custom_query_set:
             return self._custom_query_set(self.model)
         return QuerySet(self.model)
@@ -33,7 +33,7 @@ class CustomQuerySetManager(models.Manager):
             # Helps avoid problems when pickling a model.
             raise AttributeError
         # expose queryset methods as manager methods as well.
-        return getattr(self.get_query_set(), attr, *args)
+        return getattr(self.get_queryset(), attr, *args)
 
 
 class ActiveQuerySet(QuerySet):
@@ -47,8 +47,8 @@ class ActiveModelManager(CustomQuerySetManager):
 
 
 class FilteredActiveObjectsManager(ActiveModelManager):
-    def get_query_set(self):
-        return super(FilteredActiveObjectsManager, self).get_query_set().filter(is_active=True)
+    def get_queryset(self):
+        return super(FilteredActiveObjectsManager, self).get_queryset().filter(is_active=True)
 
 
 class DefaultModelManager(ActiveModelManager):
