@@ -6,11 +6,13 @@
         {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
         <a href="{% add_preserved_filters history_url %}" class="historylink">{% trans "History" %}</a>
     </li>
-    <li>
-        {% if original.is_active %}
-            <a href="{% url 'admin:view_on_site' content_type_id=content_type_id object_id=object_id %}" class="viewsitelink">{% trans "View on live" %}</a>
-        {% else %}
-            {% if has_absolute_url %}<a href="{{ original.get_absolute_url }}" class="viewsitelink">{% trans "Preview" %}</a></li>{% endif%}
-        {% endif %}
-    </li>
+    {% if has_absolute_url %}
+        <li>
+            {% if original.is_active %}
+                <a href="{% url 'admin:view_on_site' content_type_id=content_type_id object_id=object_id %}" class="viewsitelink">{% trans "View on live" %}</a>
+            {% else %}
+                <a href="{{ original.get_absolute_url }}" class="viewsitelink">{% trans "Preview" %}</a></li>
+            {% endif %}
+        </li>
+    {% endif%}
 {% endblock %}
