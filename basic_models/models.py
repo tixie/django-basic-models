@@ -49,8 +49,8 @@ class TimestampedModel(models.Model):
 
 
 class UserModel(models.Model):
-    created_by = models.ForeignKey(_compat_auth_user_model, related_name='%(class)s_created', null=True, blank=True, on_delete=models.SET_NULL)
-    updated_by = models.ForeignKey(_compat_auth_user_model, related_name='%(class)s_updated', null=True, blank=True, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey(_compat_auth_user_model, related_name='%(app_label)s_%(class)s_created', null=True, blank=True, on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey(_compat_auth_user_model, related_name='%(app_label)s_%(class)s_updated', null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         abstract = True
