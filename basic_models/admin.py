@@ -14,8 +14,10 @@
 
 from django.contrib.admin import ModelAdmin
 from django.utils.translation import ugettext_lazy, ugettext as _
-from django.contrib.admin.util import model_ngettext
-
+try:
+    from django.contrib.admin.utils import model_ngettext
+except ImportError:
+    from django.contrib.admin.util import model_ngettext
 
 __all__ = ['UserModelAdmin', 'DefaultModelAdmin', 'SlugModelAdmin', 'OneActiveAdmin']
 
