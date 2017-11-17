@@ -38,7 +38,7 @@ setup(
     packages = find_packages(),
     package_data = find_package_data(basic_models=['templates',]),
     install_requires = [
-        "django-autoslug==1.7.2"
+        "django-autoslug==1.9.3"
     ],
 
     author = 'Concentric Sky',
